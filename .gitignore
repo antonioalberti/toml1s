@@ -1,27 +1,24 @@
-# Arquivos de ambiente
+# Environment files
 .env
 
-# Arquivos de saída
+# Output files
 *.mp4
 *.mp3
 
-# Arquivos de cache do Python
+# Python cache files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Arquivos de log
+# Log files
 *.log
 
-# Exports
-*.toml
-
-# Arquivos de configuração do editor
+# Editor configuration files
 .vscode/
 .idea/
 
-# Arquivos de sistema e de soluções
+# System and solution files
 .DS_Store
 Thumbs.db
 myenv/

@@ -1,0 +1,15 @@
+ype = "directrequest"
+schemaVersion = 1
+name = "IDX2"
+externalJobID = "7fc162f3-c66d-4ce7-81b8-f77a29f8a464"
+forwardingAllowed = false
+maxTaskDuration = "0s"
+contractAddress = "0xc970705401D0D61A05d49C33ab2A39A5C49b2f94"
+evmChainID = "1337"
+minIncomingConfirmations = 0
+minContractPaymentLinkJuels = "0"
+observationSource = """
+    decode_log   [type="ethabidecodelog" abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+    
