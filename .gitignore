@@ -1,5 +1,6 @@
 # Environment files
 .env
+.json
 
 # Output files
 *.mp4
