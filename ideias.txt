@@ -1,0 +1,48 @@
+fluxmonitor
+
+type              = "fluxmonitor"
+schemaVersion     = 1
+name              = "example flux monitor spec"
+contractAddress   = "0x3cCad4715152693fE3BC4460591e3D3Fbd071b42"
+externalJobID     = "0EEC7E1D-D0D2-476C-A1A8-72DFB6633F03"
+
+threshold = 0.5
+absoluteThreshold = 0.0 # optional
+
+idleTimerPeriod   = "1s"
+idleTimerDisabled = true
+
+evmChainID = "1337"
+
+
+pollTimerPeriod   = "1m"
+pollTimerDisabled = false
+
+drumbeatEnabled  = true
+drumbeatSchedule = "CRON_TZ=UTC * */20 * * * *"
+observationSource = """
+    fetch    [type="http" method=GET url="https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"]
+    parse    [type="jsonparse" path="ethereum,usd"]
+    multiply [type="multiply" input="$(parse)" times=100]
+    fetch -> parse -> multiply
+"""
+
+
+
+CRON
+
+type = "cron"
+schemaVersion = 1
+name = ""
+externalJobID = "0eec7e1d-d0d2-476c-a1a8-72dfb6633f01"
+forwardingAllowed = false
+maxTaskDuration = "0s"
+schedule = "CRON_TZ=UTC */20 * * * * *"
+observationSource = """
+    fetch    [type="http" method=GET url="https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"]
+    parse    [type="jsonparse" path="ethereum,usd"]
+    multiply [type="multiply" input="$(parse)" times=100]
+    fetch -> parse -> multiply
+"""
+
+https://documentation-private-puce.vercel.app/docs/jobs/types/cron/
