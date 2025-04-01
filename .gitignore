@@ -27,3 +27,6 @@ myenv/
 venv/
 solutions/
 starting points/
+/Lib
+/Scripts
+pyvenv.cfg

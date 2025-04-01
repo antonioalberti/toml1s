@@ -140,17 +140,21 @@ def run_job(job_id, cookie_name, token):
         job_run_id = result_json.get("data", {}).get("id")
         if not job_run_id:
             print("Could not get job run ID from the response.")
-            return
+            return False
         print(f"Job {job_id} executed with run ID: {job_run_id}. Waiting for completion...")
         status = poll_run_status(job_id, job_run_id, cookie_name, token)
-        if status == "completed":
+        if status == "completed":            
             print(f"Job {job_id} executed successfully!")
-        elif status == "errored":
+            return True
+        elif status == "errored":            
             print(f"Job {job_id} failed execution.")
-        else:
+            return False
+        else:            
             print("Could not determine the final status of the job run.")
+            return False
     else:
         print(f"Error executing job {job_id}: {response.status_code} - {response.text}")
+        return False
 
 def list_jobs(cookie_name, token):
     """
@@ -191,7 +195,7 @@ def create_job(cookie_name, token):
         data = response.json().get("data", {})
         job_id = data.get("id")
         print("Job created successfully!")
-        print(json.dumps(response.json(), indent=2))
+        #print(json.dumps(response.json(), indent=2))
         if job_id:
             print("Created job ID:", job_id)
             return job_id
@@ -208,10 +212,10 @@ def delete_job(cookie_name, token, job_id):
     headers = {"Cookie": f"{cookie_name}={token}"}
     job_endpoint = f"{BASE_URL}/v2/jobs/{job_id}"
     response = requests.delete(job_endpoint, headers=headers)
-    if response.status_code in [200, 204]:
+    '''if response.status_code in [200, 204]:
         print("Job deleted successfully!")
     else:
-        print(f"Error deleting job: {response.status_code} - {response.text}")
+        print(f"Error deleting job: {response.status_code} - {response.text}")'''
 
 def main():
     parser = argparse.ArgumentParser(description="Manage token, run, create, and delete Chainlink jobs")
@@ -221,15 +225,16 @@ def main():
     args = parser.parse_args()
 
     # Check connection to BASE_URL
-    print(f"Attempting to connect to BASE_URL: {BASE_URL}...")
+    #print(f"Attempting to connect to BASE_URL: {BASE_URL}...")
     try:
         # Use a timeout to avoid hanging indefinitely
         response = requests.get(BASE_URL, timeout=5)
         # Check for a successful status code (e.g., 2xx)
         response.raise_for_status()
-        print("Successfully connected to BASE_URL.")
+        #print("Successfully connected to BASE_URL.")
     except requests.exceptions.RequestException as e:
-        print(f"Error connecting to BASE_URL: {e}")
+        pass
+        #print(f"Error connecting to BASE_URL: {e}")
         # Optionally exit if connection fails, as other operations will likely fail too
         # import sys
         # sys.exit(1)
@@ -237,12 +242,13 @@ def main():
 
     cookie_name, token = get_saved_token()
     if token:
-        print("Valid token found.") # Don't print the token itself for security
+        pass
+        #print("Valid token found.") # Don't print the token itself for security
     else:
-        print("Token not found or expired. Performing login...")
+        #print("Token not found or expired. Performing login...")
         try:
             cookie_name, token = login()
-            print("New token obtained successfully.") # Don't print the token
+            #print("New token obtained successfully.") # Don't print the token
         except Exception as e:
             print(f"Login failed: {e}")
             # Exit if login fails
@@ -255,19 +261,14 @@ def main():
         print("Unable to proceed without a valid token. Exiting.")
         import sys
         sys.exit(1)
-
-    if args.create:
-        print("Creating a new job...")
-        create_job(cookie_name, token)
-    elif args.delete:
-        print(f"Deleting job with ID: {args.delete}")
-        delete_job(cookie_name, token, args.delete)
-    elif args.job:
-        print(f"Running job with ID: {args.job}")
-        run_job(args.job, cookie_name, token)
-    else:
-        print("No --job, --create, or --delete parameter provided. Listing available jobs:")
-        list_jobs(cookie_name, token)
+    
+    try:
+        job_id = create_job(cookie_name, token)
+        if job_id is not None:
+            run_job(job_id, cookie_name, token)
+    finally:
+        if job_id is not None:
+            delete_job(cookie_name, token, job_id)    
 
 if __name__ == "__main__":
     main()
