@@ -7,11 +7,16 @@ import time
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Determine the script's directory and construct absolute paths
+script_dir = os.path.dirname(os.path.abspath(__file__))
+dotenv_path = os.path.join(script_dir, '.env')
+token_file_path = os.path.join(script_dir, 'chainlink_token.json')
+
+# Load environment variables from .env file using absolute path
+load_dotenv(dotenv_path=dotenv_path)
 
 # Settings
-TOKEN_FILE = "chainlink_token.json"
+TOKEN_FILE = token_file_path # Use the absolute path
 BASE_URL = os.getenv("BASE_URL")
 if not BASE_URL:
     raise ValueError("BASE_URL not found in environment variables")
@@ -178,12 +183,16 @@ def create_job(cookie_name, token):
     headers = {"Cookie": f"{cookie_name}={token}", "Content-Type": "application/json"}
     job_endpoint = f"{BASE_URL}/v2/jobs"
 
-    # Read the TOML spec from config.toml
+    # Construct the absolute path to config.toml relative to this script's location
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(script_dir, "config.toml")
+
+    # Read the TOML spec from config.toml using the absolute path
     try:
-        with open("config.toml", "r") as f:
+        with open(config_path, "r") as f:
             toml_spec = f.read()
     except FileNotFoundError:
-        print("Error: config.toml not found.")
+        print(f"Error: {config_path} not found.")
         return None
     except Exception as e:
         print(f"Error reading config.toml: {e}")
