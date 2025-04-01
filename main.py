@@ -286,5 +286,9 @@ def main(STATUS):
 if __name__ == "__main__":
     STATUS = False
     main(STATUS)
-    print("Exiting with status:", STATUS)   
-    exit(STATUS)
+    print("Exiting with status:", STATUS)
+    if STATUS:
+        exit(0)
+    else:
+        exit(1)
+    # exit(0) if successful, exit(1) if failed
