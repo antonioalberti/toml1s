@@ -28,6 +28,18 @@ observationSource = """
 """
 
 
+KEEPER
+type = "keeper"
+schemaVersion = 1
+name = "Teste Externo Precos"
+externalJobID = "0b3ee68f-8ae4-4119-82e5-1206d3f80ef4"
+forwardingAllowed = false
+contractAddress = "0xc970705401D0D61A05d49C33ab2A39A5C49b2f94"
+evmChainID = "1337"
+fromAddress = "0x0000000000000000000000000000000000000000"
+
+
+
 
 CRON
 
