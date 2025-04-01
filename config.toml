@@ -1,16 +1,38 @@
 type = "directrequest"
 schemaVersion = 1
-name = "Test aleatorio"
-externalJobID = "ad23fcf5-3dae-4a44-a6b0-87b576908a79"
-forwardingAllowed = false
-maxTaskDuration = "0s"
+name = "Ethereum Price Oracle"
+externalJobID = "ca98366c-c731-4957-b8c0-12c72f05aeea"
 contractAddress = "0xc970705401D0D61A05d49C33ab2A39A5C49b2f94"
-evmChainID = "1337"
+evmChainID = 1337
+forwardingAllowed = false
 minIncomingConfirmations = 0
 minContractPaymentLinkJuels = "0"
+maxTaskDuration = "30s"
+
 observationSource = """
-    fetch    [type="http" method=GET url="https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"]
-    parse    [type="jsonparse" path="ethereum,usd"]
-    multiply [type="multiply" input="$(parse)" times=100]
-    fetch -> parse -> multiply
+    decode_log   [type=ethabidecodelog
+                  abi="(uint256 requestId)"
+                  data="$(jobRunRequest.input_data)"]
+
+    http_fetch   [type=http
+                  url="https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+                  method=GET]
+
+    json_parse   [type=jsonparse
+                  path="ethereum.usd"]
+
+    multiply     [type=multiply
+                  input="$(json_parse)"
+                  times=100]
+
+    encode_data  [type=ethabiencode
+                  abi="(uint256)"
+                  data="$(multiply)"]
+
+    transmit     [type=ethtx
+                  to="0xc970705401D0D61A05d49C33ab2A39A5C49b2f94"
+                  functionSelector="0x4ab0d190" # fulfillOracleRequest2
+                  data="$(encode_data)"]
+
+    decode_log -> http_fetch -> json_parse -> multiply -> encode_data -> transmit
 """
