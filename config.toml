@@ -1,0 +1,48 @@
+type = "directrequest"
+schemaVersion = 1
+name = "EthPriceOracle"
+externalJobID = "ca98366c-c731-4957-b8c0-12c72f05aeea"
+contractAddress = "0xc970705401D0D61A05d49C33ab2A39A5C49b2f94"
+evmChainID = 1337
+forwardingAllowed = false
+minIncomingConfirmations = 0
+minContractPaymentLinkJuels = "0"
+maxTaskDuration = "30s"
+
+[pipeline]
+spec = '''
+    decode_log [type=ethabidecodelog
+        abi='[{"type": "bytes32", "name": "requestId"}, {"type": "address", "name": "fulfillmentCallback"}, {"type": "bytes", "name": "params"}]'
+    ]
+
+    fetch_price [type=http method=GET url='https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd']
+
+    parse_price [type=jsonparse path='ethereum.usd']
+
+    multiply_result [type=multiply input="$(parse_price)" times=100]
+
+    encode_data [type=ethabiencode
+        abi='[{"type": "bytes32", "name": "requestId"}, {"type": "uint256", "name": "price"}]'
+        data='[ $(decode_log.requestId), $(multiply_result) ]'
+    ]
+
+    send_tx [type=ethtx to='0xc970705401D0D61A05d49C33ab2A39A5C49b2f94' functionName='fulfillOracleRequest2' data="$(encode_data)"]
+'''
+
+[[tasks]]
+type = "decode_log"
+
+[[tasks]]
+type = "fetch_price"
+
+[[tasks]]
+type = "parse_price"
+
+[[tasks]]
+type = "multiply_result"
+
+[[tasks]]
+type = "encode_data"
+
+[[tasks]]
+type = "send_tx"
