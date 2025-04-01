@@ -226,7 +226,7 @@ def delete_job(cookie_name, token, job_id):
     else:
         print(f"Error deleting job: {response.status_code} - {response.text}")'''
 
-def main():
+def main(STATUS):
     '''parser = argparse.ArgumentParser(description="Manage token, run, create, and delete Chainlink jobs")
     parser.add_argument("--job", help="ID of the job to run")
     parser.add_argument("--create", action="store_true", help="Create a new job with the fixed job spec")
@@ -274,10 +274,17 @@ def main():
     try:
         job_id = create_job(cookie_name, token)
         if job_id is not None:
-            run_job(job_id, cookie_name, token)
+            STATUS=run_job(job_id, cookie_name, token)
+        else:
+            print("Failed to create job. Exiting.")
+            STATUS = True
+    
     finally:
         if job_id is not None:
             delete_job(cookie_name, token, job_id)    
 
 if __name__ == "__main__":
-    main()
+    STATUS = False
+    main(STATUS)
+    print("Exiting with status:", STATUS)   
+    exit(STATUS)
