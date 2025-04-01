@@ -141,7 +141,7 @@ def run_job(job_id, cookie_name, token):
         if not job_run_id:
             print("Could not get job run ID from the response.")
             return False
-        print(f"Job {job_id} executed with run ID: {job_run_id}. Waiting for completion...")
+        #print(f"Job {job_id} executed with run ID: {job_run_id}. Waiting for completion...")
         status = poll_run_status(job_id, job_run_id, cookie_name, token)
         if status == "completed":            
             print(f"Job {job_id} executed successfully!")
@@ -194,10 +194,10 @@ def create_job(cookie_name, token):
     if response.status_code in [200, 201]:
         data = response.json().get("data", {})
         job_id = data.get("id")
-        print("Job created successfully!")
+        #print("Job created successfully!")
         #print(json.dumps(response.json(), indent=2))
         if job_id:
-            print("Created job ID:", job_id)
+            #print("Created job ID:", job_id)
             return job_id
         else:
             print("Could not extract the created job ID.")
@@ -218,11 +218,11 @@ def delete_job(cookie_name, token, job_id):
         print(f"Error deleting job: {response.status_code} - {response.text}")'''
 
 def main():
-    parser = argparse.ArgumentParser(description="Manage token, run, create, and delete Chainlink jobs")
+    '''parser = argparse.ArgumentParser(description="Manage token, run, create, and delete Chainlink jobs")
     parser.add_argument("--job", help="ID of the job to run")
     parser.add_argument("--create", action="store_true", help="Create a new job with the fixed job spec")
     parser.add_argument("--delete", help="Delete the job by ID")
-    args = parser.parse_args()
+    args = parser.parse_args()'''
 
     # Check connection to BASE_URL
     #print(f"Attempting to connect to BASE_URL: {BASE_URL}...")
