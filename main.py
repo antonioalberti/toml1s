@@ -115,6 +115,7 @@ def poll_run_status(job_id, job_run_id, cookie_name, token, timeout=60):
                     errors = attributes.get("errors", [])
                     print("Job run finished. Outputs:", outputs, "Errors:", errors)
                     if outputs and all(o is not None for o in outputs) and (not errors or all(e is None for e in errors)):
+                        STATUS = True
                         return "completed"
                     else:
                         return "errored"
@@ -226,7 +227,9 @@ def delete_job(cookie_name, token, job_id):
     else:
         print(f"Error deleting job: {response.status_code} - {response.text}")'''
 
-def main(STATUS):
+def main(): # Remove STATUS from parameters
+    STATUS = False # Initialize STATUS locally within main
+    job_id = None # Initialize job_id to None
     '''parser = argparse.ArgumentParser(description="Manage token, run, create, and delete Chainlink jobs")
     parser.add_argument("--job", help="ID of the job to run")
     parser.add_argument("--create", action="store_true", help="Create a new job with the fixed job spec")
@@ -277,18 +280,45 @@ def main(STATUS):
             STATUS=run_job(job_id, cookie_name, token)
         else:
             print("Failed to create job. Exiting.")
-            STATUS = True
-    
+            STATUS = False
+        # Return the determined status at the end of the core logic
+        return STATUS
+
     finally:
+        # Ensure deletion happens even if run_job fails
         if job_id is not None:
-            delete_job(cookie_name, token, job_id)    
+            delete_job(cookie_name, token, job_id)
+            # Note: The return STATUS happens before the finally block completes
+            # if no exception occurred within the try block. If an exception
+            # happened *before* STATUS was returned in try, this function
+            # would implicitly return None unless an explicit return is added here
+            # or in an except block. Current logic seems to assume exceptions
+            # before run_job are handled by sys.exit or are not expected to
+            # influence the final STATUS return value from this path.
 
 if __name__ == "__main__":
-    STATUS = False
-    main(STATUS)
-    print("Exiting with status:", STATUS)
-    if STATUS:
+    # STATUS is now determined by the return value of main()
+    final_status = main()
+    # Handle potential None return if main exits unexpectedly before returning bool
+    if final_status is None:
+        print("Main function did not return a status. Exiting with failure.")
+        final_status = False
+
+    print("Exiting with status:", final_status)
+    if final_status:
         exit(0)
     else:
         exit(1)
-    # exit(0) if successful, exit(1) if failed
+   # This comment explains the convention being followed by the `exit()` calls above.
+   # When a program finishes running, especially one run from a command line or
+   # called by another script, it returns a numerical value called an "exit code"
+   # or "exit status" to the operating system or the calling process.
+   # By convention:
+   # - An exit code of 0 indicates that the program completed successfully without errors.
+   # - A non-zero exit code (like 1, 2, etc.) indicates that some kind of error or
+   #   failure occurred during execution. Different non-zero codes can sometimes be
+   #   used to signal different types of errors, but 1 is commonly used for general failure.
+   # This mechanism allows other programs, scripts (like shell scripts), or automation tools
+   # to check whether this Python script ran successfully and potentially take different
+   # actions based on the outcome. The `if STATUS:` block implements this convention
+   # using the script's internal `STATUS` flag.

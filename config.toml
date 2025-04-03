@@ -1,14 +1,12 @@
-type = "webhook"
+type = "directrequest"
 schemaVersion = 1
 name = "Local ETH Price Fetcher"
 externalJobID = "ca98366c-c731-4957-b8c0-12c72f05aeea"
+evmChainID = "1337"
 maxTaskDuration = "30s"
-observationSource = """
-    fetch          [type=http method=GET url="https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"]
-    parse          [type=jsonparse path="ethereum,usd"]
-    multiply       [type=multiply input="$(parse)" times=100]
-    encode         [type=jsonencode input="$(multiply)"]
-    log            [type=bridge name="log" input="$(encode)"]
 
-    fetch -> parse -> multiply -> encode -> log
+observationSource = """
+    http_task     [type=http method=GET url="https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd" jsonparse="ethereum.usd"]
+    multiply_task [type=multiply input="$(http_task)" times="100"]
+    log_task      [type=report input="$(multiply_task)"]
 """
