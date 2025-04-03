@@ -1,1 +1,0 @@
-Correct the syntax of this TOML script without loosing the meaning. Access https://docs.chain.link/chainlink-nodes/oracle-jobs/all-jobs to check the correct use of TOML files. You need to be very precise in the output. Do not comment on the TOML code under any circumstances. This format does not accept comments.

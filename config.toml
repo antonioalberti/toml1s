@@ -1,12 +1,15 @@
 type = "directrequest"
 schemaVersion = 1
-name = "Local ETH Price Fetcher"
+name = "Local ETH Price Fetch Log"
 externalJobID = "ca98366c-c731-4957-b8c0-12c72f05aeea"
-evmChainID = "1337"
+evmChainID = 1337
 maxTaskDuration = "30s"
 
 observationSource = """
-    http_task     [type=http method=GET url="https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd" jsonparse="ethereum.usd"]
-    multiply_task [type=multiply input="$(http_task)" times="100"]
-    log_task      [type=report input="$(multiply_task)"]
+    get_price     [type=http method=GET url="https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd" responseFormat="json"]
+    parse_price   [type=jsonparse path="ethereum.usd" input="$(get_price)"]
+    multiply      [type=multiply input="$(parse_price)" times=100]
+    log_result    [type=log input="$(multiply)"]
+
+    get_price -> parse_price -> multiply -> log_result
 """
